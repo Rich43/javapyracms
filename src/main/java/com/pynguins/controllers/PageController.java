@@ -5,16 +5,18 @@ import com.pynguins.models.PageDao;
 import org.kefirsf.bb.BBProcessorFactory;
 import org.kefirsf.bb.TextProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 
 @Controller
 public class PageController {
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public class ResourceNotFoundException extends RuntimeException {
+    }
 
     @Autowired
     private PageDao pageDao;
@@ -29,13 +31,14 @@ public class PageController {
     }
 
     @RequestMapping(value = "/article/item/{pageName}", method = RequestMethod.GET)
-    @Transactional
     public ModelAndView pageRead(@PathVariable("pageName") String pageName) {
         Page page = pageDao.findByName(pageName);
         if (page == null) {
             return this.makeMav("Page Not Found", "Error");
         } else {
-            return this.makeMav(page.getContent(), page.getDisplayName());
+            ModelAndView mav = this.makeMav(page.getContent(), page.getDisplayName());
+            mav.addObject("pageName", pageName);
+            return mav;
         }
     }
 
@@ -53,5 +56,33 @@ public class PageController {
                     page.getName(), page.getDisplayName());
         }
         return this.makeMav(result, "List Articles");
+    }
+
+    @RequestMapping(value = "/article/edit/{pageName}", method = RequestMethod.GET)
+    public ModelAndView pageEdit(@PathVariable("pageName") String pageName) {
+        Page page = pageDao.findByName(pageName);
+        if (page == null) {
+            return this.makeMav("Page Not Found", "Error");
+        }
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("edit");
+        mav.addObject("name", page.getName());
+        mav.addObject("content", page.getContent());
+        mav.addObject("displayName", page.getDisplayName());
+        return mav;
+    }
+
+    @RequestMapping(value = "/article/edit/{pageName}", method = RequestMethod.POST)
+    @Transactional
+    public String pageEditPost(@PathVariable("pageName") String pageName,
+                                     @RequestParam("displayName") String displayName,
+                                     @RequestParam("content") String content) {
+        Page page = pageDao.findByName(pageName);
+        if (page == null) {
+            throw new ResourceNotFoundException();
+        }
+        page.setDisplayName(displayName);
+        page.setContent(content);
+        return "redirect:/article/item/" +  pageName;
     }
 }
