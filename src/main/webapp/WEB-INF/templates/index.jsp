@@ -17,6 +17,7 @@
             <h3>Main Menu</h3>
             <ul>
                 <li><a href="/">Home</a></li>
+                <li><a href="/article/list">List Articles</a></li>
             </ul>
         </div>
     </div>
