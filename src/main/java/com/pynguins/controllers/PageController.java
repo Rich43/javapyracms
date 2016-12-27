@@ -2,7 +2,8 @@ package com.pynguins.controllers;
 
 import com.pynguins.models.Page;
 import com.pynguins.models.PageDao;
-import com.pynguins.models.UserDao;
+import org.kefirsf.bb.BBProcessorFactory;
+import org.kefirsf.bb.TextProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,9 @@ public class PageController {
         if (page == null) {
             mav.addObject("message", "Page Not Found");
         } else {
-            mav.addObject("message", page.getContent());
+            TextProcessor processor = BBProcessorFactory.getInstance().create();
+            mav.addObject("displayName", page.getDisplayName());
+            mav.addObject("content", processor.process(page.getContent()));
         }
 
         return mav;

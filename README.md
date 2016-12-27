@@ -1,2 +1,0 @@
-# javapyracms
-Simple Java CMS
