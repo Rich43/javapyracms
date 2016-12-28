@@ -15,13 +15,13 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class PageController {
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public class ResourceNotFoundException extends RuntimeException {
+    private class ResourceNotFoundException extends RuntimeException {
     }
 
     @Autowired
     private PageDao pageDao;
 
-    public ModelAndView makeMav(String content, String displayName) {
+    private ModelAndView makeMav(String content, String displayName) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("index");
         TextProcessor processor = BBProcessorFactory.getInstance().create();
@@ -58,31 +58,55 @@ public class PageController {
         return this.makeMav(result, "List Articles");
     }
 
-    @RequestMapping(value = "/article/edit/{pageName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/article/update/{pageName}", method = RequestMethod.GET)
     public ModelAndView pageEdit(@PathVariable("pageName") String pageName) {
         Page page = pageDao.findByName(pageName);
         if (page == null) {
             return this.makeMav("Page Not Found", "Error");
         }
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("edit");
+        mav.setViewName("edit_create");
+        mav.addObject("edit", true);
         mav.addObject("name", page.getName());
         mav.addObject("content", page.getContent());
         mav.addObject("displayName", page.getDisplayName());
         return mav;
     }
 
-    @RequestMapping(value = "/article/edit/{pageName}", method = RequestMethod.POST)
+    @RequestMapping(value = "/article/update/{pageName}", method = RequestMethod.POST)
     @Transactional
-    public String pageEditPost(@PathVariable("pageName") String pageName,
-                                     @RequestParam("displayName") String displayName,
-                                     @RequestParam("content") String content) {
+    public String pageUpdatePost(@PathVariable("pageName") String pageName,
+                                 @RequestParam("displayName") String displayName,
+                                 @RequestParam("content") String content) {
         Page page = pageDao.findByName(pageName);
         if (page == null) {
             throw new ResourceNotFoundException();
         }
         page.setDisplayName(displayName);
         page.setContent(content);
+        return "redirect:/article/item/" +  pageName;
+    }
+
+    @RequestMapping(value = "/article/create/{pageName}", method = RequestMethod.GET)
+    public ModelAndView pageCreate(@PathVariable("pageName") String pageName) {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("edit_create");
+        mav.addObject("edit", false);
+        mav.addObject("name", pageName);
+        mav.addObject("content", "");
+        mav.addObject("displayName", "");
+        return mav;
+    }
+
+    @RequestMapping(value = "/article/create/{pageName}", method = RequestMethod.POST)
+    @Transactional
+    public String pageCreatePost(@PathVariable("pageName") String pageName,
+                                 @RequestParam("displayName") String displayName,
+                                 @RequestParam("content") String content) {
+        Page page = new Page(pageName);
+        page.setDisplayName(displayName);
+        page.setContent(content);
+        pageDao.save(page);
         return "redirect:/article/item/" +  pageName;
     }
 }
