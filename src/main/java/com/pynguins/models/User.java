@@ -13,7 +13,7 @@ public class User {
     private long id;
 
     @NotNull
-    @Pattern(regexp = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
+    @Pattern(regexp = "\\b[A-Z0-9._%-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b",
              flags = {Pattern.Flag.CASE_INSENSITIVE})
     private String email;
 
