@@ -10,6 +10,10 @@
           type="text/css" media="screen" charset="utf-8"/>
 </head>
 <body>
+<a href="https://github.com/Rich43/javapyracms">
+    <img style="position: absolute; top: 0; right: 0; border: 0;"
+         src="/static/images/edit-me-on-github.png" alt="Edit me on GitHub">
+</a>
 <div class="pageborder">
     <h1 class="header">Pynguins - Java Edition</h1>
     <div class="menus">
