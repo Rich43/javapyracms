@@ -48,14 +48,12 @@ public class PageController {
     }
 
     @RequestMapping(value = "/article/list", method = RequestMethod.GET)
-    public ModelAndView list() {
+    public ModelAndView pageList() {
         Iterable<Page> pages = pageDao.findAll();
-        String result = "";
-        for (Page page : pages) {
-            result += String.format("[url=/article/item/%s]%s[/url]\n",
-                    page.getName(), page.getDisplayName());
-        }
-        return this.makeMav(result, "List Articles");
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("list");
+        mav.addObject("listItems", pages);
+        return mav;
     }
 
     @RequestMapping(value = "/article/update/{pageName}", method = RequestMethod.GET)
@@ -108,5 +106,14 @@ public class PageController {
         page.setContent(content);
         pageDao.save(page);
         return "redirect:/article/item/" +  pageName;
+    }
+
+    @RequestMapping(value = "/redirect/{pageName}", method = RequestMethod.POST)
+    @Transactional
+    public String pageRedirect(@PathVariable("pageName") String pageName,
+                               @RequestParam("pageId") String pageId) {
+        System.out.println(pageName);
+        System.out.println(pageId);
+        return "redirect:/" + pageName.replace("_", "/") + "/" + pageId;
     }
 }
